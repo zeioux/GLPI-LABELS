@@ -21,3 +21,11 @@ def load_config():
     cfg = configparser.ConfigParser()
     cfg.read(CONFIG_PATH, encoding="utf-8")
 
+    base_url = cfg.get("glpi", "base_url", fallback="").strip()
+    prefix_lieu = cfg.get("glpi", "prefix_lieu", fallback="").strip()
+
+    if not base_url:
+        print("base_url manquant dans config.ini")
+        sys.exit(1)
+
+    return base_url, prefix_lieu

@@ -8,3 +8,16 @@ from tkinter import filedialog, messagebox
 import pandas as pd
 import qrcode
 from fpdf import FPDF
+
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+CONFIG_PATH = os.path.join(SCRIPT_DIR, "config.ini")
+
+
+def load_config():
+    if not os.path.exists(CONFIG_PATH):
+        print("Pas de config.ini -> copier config.example.ini et remplir.")
+        sys.exit(1)
+
+    cfg = configparser.ConfigParser()
+    cfg.read(CONFIG_PATH, encoding="utf-8")
+

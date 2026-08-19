@@ -77,3 +77,23 @@ def choisir_csv():
         title="Sélectionner le fichier CSV exporté de GLPI",
         filetypes=[("Fichiers CSV", "*.csv"), ("Tous les fichiers", "*.*")],
     )
+
+def main():
+    base_url, prefix_lieu = load_config()
+    csv_path = choisir_csv()
+    if not csv_path:
+        print("Aucun fichier sélectionné.")
+        return
+
+    # sorties à côté du csv d'entrée, plus simple pour le user 
+    dossier_sortie = os.path.dirname(csv_path)
+    pdf_out = os.path.join(dossier_sortie, "etiquettes_glpi.pdf")
+    csv_out = os.path.join(dossier_sortie, "feuille_de_route.csv")
+
+    print(f"Fichier chargé : {csv_path}")
+    try:
+        # ; et utf-8 codé en dur, ce que GLPI sort par défaut
+        df = pd.read_csv(csv_path, sep=";", encoding="utf-8")
+    except Exception as e:
+        print(f"Erreur de lecture du CSV : {e}")
+        return

@@ -61,3 +61,10 @@ def clean_location(valeur, prefix=""):
     dept = morceaux[0].strip()
     sous_dept = morceaux[1].strip() if len(morceaux) > 1 else ""
     return dept, sous_dept
+
+def clear_user(valeur): 
+    valeur = str(valeur).strip()
+    if pd.isna(valeur) or valeur in ("nan", ""): 
+        return "Sans Utilisateur" 
+    # vire le '(123)' que GLPI colle après le no
+    return re.sub(r"\s+\(d+\)$", "", valeur)

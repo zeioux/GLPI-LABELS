@@ -14,7 +14,7 @@ CONFIG_PATH = os.path.join(SCRIPT_DIR, "config.ini")
 
 
 def load_config():
-    # stop direct si le fichier de conf manque
+    # fail fast, pas de retry ni de valeurs par défaut, si config absente tant pis 
     if not os.path.exists(CONFIG_PATH):
         print("Pas de config.ini -> copier config.example.ini et remplir.")
         sys.exit(1)
@@ -22,18 +22,17 @@ def load_config():
     cfg = configparser.ConfigParser()
     cfg.read(CONFIG_PATH, encoding="utf-8")
 
-    # fallback string vide + strip pour évite de crash sur un espace en fin de ligne
+    # strip anti-espace foireux en fin de ligne dans le ini
     base_url = cfg.get("glpi", "base_url", fallback="").strip()
     prefix_lieu = cfg.get("glpi", "prefix_lieu", fallback="").strip()
 
-    # L'URL GLPI est indispensable dpnc on bloque si elle est vide
     if not base_url:
         print("base_url manquant dans config.ini")
         sys.exit(1)
 
     return base_url, prefix_lieu
 
-# Avery L6140 - 4x10, en mm
+# Avery L6140, 4x10, mm (dims de la fiche produit)
 COLS, ROWS = 4, 10
 LABEL_W, LABEL_H = 45.7, 25.4
 GAP_X = 2.7
@@ -43,3 +42,22 @@ X_START, Y_START = 9.5, 21.0
 QR_SIZE = 18
 QR_MARGIN_LEFT, QR_MARGIN_Y = 2.0, 2.9
 TEXT_ZONE_X, TEXT_ZONE_W = 22.0, 23.0
+
+def clean_location(valeur, prefix=""):
+    # format GLPI: Site > Bâtiment > Salle
+    # force str sinon pandas file un NaN/float et ça pete
+    valeur = str(valeur).strip()
+
+    # cases vides export CSV, ZZZ_ pour que ça tombe en dernier dans un tri alpha
+    if pd.isna(valeur) or valeur in ("nan", ""):
+        return "ZZZ_Inconnu", ""
+    
+    # enlève le préfixe si présent 
+    if prefix and valeur.startswith(prefix):
+        valeur = valeur.replace(prefix, "", 1).strip()
+
+    # dept = 1er niveau, sous_dept = 2e si y'en a un, apres le reste pas besoin
+    morceaux = valeur.split(" > ")
+    dept = morceaux[0].strip()
+    sous_dept = morceaux[1].strip() if len(morceaux) > 1 else ""
+    return dept, sous_dept

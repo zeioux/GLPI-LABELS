@@ -68,3 +68,12 @@ def clear_user(valeur):
         return "Sans Utilisateur" 
     # vire le '(123)' que GLPI colle après le no
     return re.sub(r"\s+\(d+\)$", "", valeur)
+
+def choisir_csv():
+    # popup file picker, root caché sinon on se tape une fenêtre vide en plus
+    root = tk.Tk()
+    root.withdraw()
+    return filedialog.askopenfilename(
+        title="Sélectionner le fichier CSV exporté de GLPI",
+        filetypes=[("Fichiers CSV", "*.csv"), ("Tous les fichiers", "*.*")],
+    )
